@@ -1,20 +1,42 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+  <a-config-provider :locale="locale">
+    <div id="app">
+      <router-view/>
     </div>
-    <router-view/>
-  </div>
+  </a-config-provider>
 </template>
+<script>
+import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN'
+import zhTW from 'ant-design-vue/lib/locale-provider/zh_TW'
+import enUS from 'ant-design-vue/lib/locale-provider/en_US'
+export default {
+  data () {
+    return {
+      locale: zhCN
+    }
+  },
+  watch: {
+    userLang (newVal, oldVal) {
+      if (newVal === 'zh-CN') {
+        this.locale = zhCN
+      } else if (newVal === 'zh-TW') {
+        this.locale = zhTW
+      } else if (newVal === 'en-US') {
+        this.locale = enUS
+      }
+    }
 
+  },
+  computed: {
+    userLang () {
+      return this.$store.getters.userLang
+    }
+  }
+}
+</script>
 <style lang="less">
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+   height: 100%;
 }
 
 #nav {
