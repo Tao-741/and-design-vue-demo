@@ -17,9 +17,9 @@ export const forEach = (arr, fn) => {
 }
 // 获取登录用户的菜单列表 access允许授权的方法
 export const getLoginList = (list, access) => {
-  const res = {}
+  const res = []
   forEach(list, item => {
-    if (item.meta || (item.meta && !item.meta.hideInMenu)) {
+    if (!item.meta || (item.meta && !item.meta.hideInMenu)) {
       const obj = {
         icon: (item.meta && item.meta.icon) || '',
         name: item.name,
@@ -28,7 +28,7 @@ export const getLoginList = (list, access) => {
         path: item.path
       }
       if (hasChild(item) && showTitleMenuEle(item, access)) {
-        obj.children = getLoginList(list.children, access)
+        obj.children = getLoginList(item.children, access)
       }
       if (showTitleMenuEle(item, access)) {
         res.push(obj)
@@ -47,5 +47,45 @@ export const showTitleMenuEle = (item, access) => {
   const code = item.meta.code
   console.log(code)
   return true
+}
+// 获取路由列表数据
+export const getHomeRoutes = routers => {
+  let i = -1
+  const len = routers.length
+  let homeRoute = {}
+  while (++i < len) {
+    const item = routers[i]
+    if (item.children && item.children.length) {
+      const res = getHomeRoutes(item.children)
+      if (res.name) {
+        return res
+      }
+    } else {
+      if (item.name === 'home') {
+        homeRoute = item
+      }
+    }
+  }
+  return homeRoute
+}
+// 获取面包屑导航的数据
+export const getBreadCrumbList = (routeMatched, homeRoute) => {
+  let res = routeMatched.filter(item => {
+    return item.meta === undefined || !item.meta.hideInMenu
+  }).map(item => {
+    return {
+      icon: (item.meta && item.meta.icon) || '',
+      name: item.name,
+      meta: item.meta
+    }
+  })
+  res = res.filter(item => {
+    return !item.meta.hideInMenu
+  })
+  if (homeRoute.path !== undefined) {
+    return [Object.assign(homeRoute, { to: homeRoute.path }), ...res]
+  } else {
+    return { ...res }
+  }
 }
 export default utils
